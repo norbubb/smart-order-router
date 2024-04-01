@@ -658,7 +658,7 @@ export const USDB_BLAST = new Token(
 
 export const USDC_X1TESTNET = new Token(
   ChainId.X1_TESTNET,
-  '0x2E1cbA4a9f6E69d27e65046fC93b873b05F79a39',
+  '0x04292af1cf8687235a83766d55b307880fc5e76d',
   18,
   'USDC',
   'USDC X1_TESTNET'
@@ -666,7 +666,7 @@ export const USDC_X1TESTNET = new Token(
 
 export const USDT_X1TESTNET = new Token(
   ChainId.X1_TESTNET,
-  '0xf7B48f136c7d060F5fc6F020F06418c53097F51B',
+  '0xded3ac2a172a21a729063c39da55c030ec4a8cc9',
   18,
   'USDT',
   'USDT X1_TESTNET'
@@ -674,7 +674,7 @@ export const USDT_X1TESTNET = new Token(
 
 export const DAI_X1TESTNET = new Token(
   ChainId.X1_TESTNET,
-  '0x0e6ABF17C186a08Bc247C85e54F3ceDE27D94369',
+  '0x1b981e783d8d139e74ebbd7be5d99d8a0a7eeb0a',
   18,
   'DAI',
   'DAI X1_TESTNET'
