@@ -1,4 +1,4 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 import _ from 'lodash';
 import sinon from 'sinon';
 import {

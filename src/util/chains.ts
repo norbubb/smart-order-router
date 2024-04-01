@@ -4,7 +4,7 @@ import {
   Ether,
   NativeCurrency,
   Token,
-} from '@uniswap/sdk-core';
+} from '@jaguarswap/sdk-core';
 
 // WIP: Gnosis, Moonbeam
 export const SUPPORTED_CHAINS: ChainId[] = [
@@ -24,6 +24,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.AVALANCHE,
   ChainId.BASE,
   ChainId.BLAST,
+  ChainId.X1_TESTNET
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
 
@@ -101,6 +102,8 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.BASE_GOERLI;
     case 81457:
       return ChainId.BLAST;
+    case 195:
+      return ChainId.X1_TESTNET;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -127,6 +130,7 @@ export enum ChainName {
   BASE = 'base-mainnet',
   BASE_GOERLI = 'base-goerli',
   BLAST = 'blast-mainnet',
+  X1_TESTNET = 'x1-testnet',
 }
 
 export enum NativeCurrencyName {
@@ -138,6 +142,7 @@ export enum NativeCurrencyName {
   MOONBEAM = 'GLMR',
   BNB = 'BNB',
   AVALANCHE = 'AVAX',
+  OKB = 'OKB'
 }
 
 export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
@@ -201,6 +206,11 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
     'AVALANCHE',
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
   ],
+  [ChainId.X1_TESTNET]: [
+    'OKB',
+    'OKB',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
   [ChainId.BASE]: [
     'ETH',
     'ETHER',
@@ -231,6 +241,7 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.MOONBEAM]: NativeCurrencyName.MOONBEAM,
   [ChainId.BNB]: NativeCurrencyName.BNB,
   [ChainId.AVALANCHE]: NativeCurrencyName.AVALANCHE,
+  [ChainId.X1_TESTNET]: NativeCurrencyName.OKB,
   [ChainId.BASE]: NativeCurrencyName.ETHER,
   [ChainId.BLAST]: NativeCurrencyName.ETHER,
 };
@@ -277,6 +288,8 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.BASE_GOERLI;
     case 81457:
       return ChainName.BLAST;
+    case 195:
+      return ChainName.X1_TESTNET;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -322,6 +335,8 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
       return process.env.JSON_RPC_PROVIDER_BASE!;
     case ChainId.BLAST:
       return process.env.JSON_RPC_PROVIDER_BLAST!;
+    case ChainId.X1_TESTNET:
+      return process.env.JSON_RPC_PROVIDER_X1TESTNET!;
     default:
       throw new Error(`Chain id: ${id} not supported`);
   }
@@ -448,6 +463,13 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
     18,
     'WAVAX',
     'Wrapped AVAX'
+  ),
+  [ChainId.X1_TESTNET]: new Token(
+    ChainId.X1_TESTNET,
+    '0xee1a9629cce8f26deb1ecffbd8f306bef2117423',
+    18,
+    'WOKB',
+    'Wrapped OKB'
   ),
   [ChainId.BASE]: new Token(
     ChainId.BASE,
@@ -641,6 +663,29 @@ class AvalancheNativeCurrency extends NativeCurrency {
   }
 }
 
+function isX1Testnet(chainId: number): chainId is ChainId.AVALANCHE {
+  return chainId === ChainId.X1_TESTNET;
+}
+
+class X1TestnetNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId;
+  }
+
+  get wrapped(): Token {
+    if (!isX1Testnet(this.chainId)) throw new Error('Not X1 Testnet');
+    const nativeCurrency = WRAPPED_NATIVE_CURRENCY[this.chainId];
+    if (nativeCurrency) {
+      return nativeCurrency;
+    }
+    throw new Error(`Does not support this chain ${this.chainId}`);
+  }
+
+  public constructor(chainId: number) {
+    if (!isX1Testnet(chainId)) throw new Error('Not X1 Testnet');
+    super(chainId, 18, 'OKB', 'X1Layer');
+  }
+}
 export class ExtendedEther extends Ether {
   public get wrapped(): Token {
     if (this.chainId in WRAPPED_NATIVE_CURRENCY) {
@@ -678,6 +723,8 @@ export function nativeOnChain(chainId: number): NativeCurrency {
     cachedNativeCurrency[chainId] = new BnbNativeCurrency(chainId);
   } else if (isAvax(chainId)) {
     cachedNativeCurrency[chainId] = new AvalancheNativeCurrency(chainId);
+  } else if (isX1Testnet(chainId)) {
+    cachedNativeCurrency[chainId] = new X1TestnetNativeCurrency(chainId);
   } else {
     cachedNativeCurrency[chainId] = ExtendedEther.onChain(chainId);
   }

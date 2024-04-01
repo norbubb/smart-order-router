@@ -1,11 +1,11 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { BaseProvider } from '@ethersproject/providers';
-import { ChainId } from '@uniswap/sdk-core';
+import { ChainId } from '@jaguarswap/sdk-core';
 import _ from 'lodash';
 import stats from 'stats-lite';
 
-import { UniswapInterfaceMulticall__factory } from '../types/v3/factories/UniswapInterfaceMulticall__factory';
 import { UniswapInterfaceMulticall } from '../types/v3/UniswapInterfaceMulticall';
+import { UniswapInterfaceMulticall__factory } from '../types/v3/factories/UniswapInterfaceMulticall__factory';
 import { UNISWAP_MULTICALL_ADDRESSES } from '../util/addresses';
 import { log } from '../util/log';
 
@@ -280,8 +280,7 @@ export class UniswapMulticallProvider extends IMulticallProvider<UniswapMultical
       if (!success || returnData.length <= 2) {
         log.debug(
           { result: aggregateResults[i] },
-          `Invalid result calling ${functionNames[i]} with ${
-            functionParams ? functionParams[i] : '0'
+          `Invalid result calling ${functionNames[i]} with ${functionParams ? functionParams[i] : '0'
           } params`
         );
         results.push({
@@ -304,10 +303,8 @@ export class UniswapMulticallProvider extends IMulticallProvider<UniswapMultical
 
     log.debug(
       { results, functionNames, address },
-      `Results for multicall for ${
-        functionNames.length
-      } functions at address ${address} with ${
-        functionParams ? functionParams.length : ' 0'
+      `Results for multicall for ${functionNames.length
+      } functions at address ${address} with ${functionParams ? functionParams.length : ' 0'
       } different sets of params. Results as of block ${blockNumber}`
     );
     return {

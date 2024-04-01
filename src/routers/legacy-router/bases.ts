@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 
 import {
   BTC_BNB,
@@ -12,6 +12,7 @@ import {
   USDC_BASE,
   USDC_BNB,
   USDC_MAINNET,
+  USDC_X1TESTNET,
   USDT_BNB,
   USDT_MAINNET,
   WBTC_MAINNET,
@@ -69,6 +70,10 @@ export const BASES_TO_CHECK_TRADES_AGAINST = (
       WRAPPED_NATIVE_CURRENCY[ChainId.AVALANCHE]!,
       USDC_AVAX,
       DAI_AVAX,
+    ],
+    [ChainId.X1_TESTNET]: [
+      WRAPPED_NATIVE_CURRENCY[ChainId.X1_TESTNET]!,
+      USDC_X1TESTNET,
     ],
     [ChainId.BASE]: [WRAPPED_NATIVE_CURRENCY[ChainId.BASE]!, USDC_BASE],
     [ChainId.BASE_GOERLI]: [WRAPPED_NATIVE_CURRENCY[ChainId.BASE_GOERLI]!],

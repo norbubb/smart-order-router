@@ -1,4 +1,4 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 import { Pair } from '@uniswap/v2-sdk';
 import _ from 'lodash';
 
@@ -29,6 +29,7 @@ import {
   USDC_NATIVE_ARBITRUM,
   USDC_OPTIMISM,
   USDC_POLYGON,
+  USDC_X1TESTNET,
   USDT_ARBITRUM,
   USDT_BNB,
   USDT_MAINNET,
@@ -104,6 +105,10 @@ const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     USDC_AVAX,
     DAI_AVAX,
   ],
+  [ChainId.X1_TESTNET]: [
+    WRAPPED_NATIVE_CURRENCY[ChainId.X1_TESTNET],
+    USDC_X1TESTNET,
+  ],
   [ChainId.BASE_GOERLI]: [],
   [ChainId.BASE]: [WRAPPED_NATIVE_CURRENCY[ChainId.BASE], USDC_BASE],
   [ChainId.ZORA]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZORA]!],
@@ -125,7 +130,7 @@ const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
  * @class StaticV2SubgraphProvider
  */
 export class StaticV2SubgraphProvider implements IV2SubgraphProvider {
-  constructor(private chainId: ChainId) {}
+  constructor(private chainId: ChainId) { }
 
   public async getPools(
     tokenIn?: Token,

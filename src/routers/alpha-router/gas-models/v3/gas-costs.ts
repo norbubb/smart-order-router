@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ChainId, Currency, Token } from '@uniswap/sdk-core';
+import { ChainId, Currency, Token } from '@jaguarswap/sdk-core';
 
 import { AAVE_MAINNET, LIDO_MAINNET } from '../../../../providers';
 import { V3Route } from '../../../router';
@@ -30,6 +30,7 @@ export const BASE_SWAP_COST = (id: ChainId): BigNumber => {
     case ChainId.ARBITRUM_SEPOLIA:
       return BigNumber.from(5000);
     case ChainId.POLYGON:
+    case ChainId.X1_TESTNET:
     case ChainId.POLYGON_MUMBAI:
       return BigNumber.from(2000);
 
@@ -67,6 +68,7 @@ export const COST_PER_INIT_TICK = (id: ChainId): BigNumber => {
     case ChainId.ARBITRUM_SEPOLIA:
       return BigNumber.from(31000);
     case ChainId.POLYGON:
+    case ChainId.X1_TESTNET:
     case ChainId.POLYGON_MUMBAI:
       return BigNumber.from(31000);
     case ChainId.CELO:
@@ -102,6 +104,7 @@ export const COST_PER_HOP = (id: ChainId): BigNumber => {
       return BigNumber.from(80000);
     case ChainId.POLYGON:
     case ChainId.POLYGON_MUMBAI:
+    case ChainId.X1_TESTNET:
       return BigNumber.from(80000);
     case ChainId.CELO:
     case ChainId.CELO_ALFAJORES:

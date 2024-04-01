@@ -1,7 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { parseBytes32String } from '@ethersproject/strings';
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 import _ from 'lodash';
 
 import { IERC20Metadata__factory } from '../types/v3/factories/IERC20Metadata__factory';
@@ -656,11 +656,35 @@ export const USDB_BLAST = new Token(
   'USD Blast'
 )
 
+export const USDC_X1TESTNET = new Token(
+  ChainId.X1_TESTNET,
+  '0x2E1cbA4a9f6E69d27e65046fC93b873b05F79a39',
+  18,
+  'USDC',
+  'USDC X1_TESTNET'
+)
+
+export const USDT_X1TESTNET = new Token(
+  ChainId.X1_TESTNET,
+  '0xf7B48f136c7d060F5fc6F020F06418c53097F51B',
+  18,
+  'USDT',
+  'USDT X1_TESTNET'
+)
+
+export const DAI_X1TESTNET = new Token(
+  ChainId.X1_TESTNET,
+  '0x0e6ABF17C186a08Bc247C85e54F3ceDE27D94369',
+  18,
+  'DAI',
+  'DAI X1_TESTNET'
+)
+
 export class TokenProvider implements ITokenProvider {
   constructor(
     private chainId: ChainId,
     protected multicall2Provider: IMulticallProvider
-  ) {}
+  ) { }
 
   private async getTokenSymbol(
     addresses: string[],
@@ -805,10 +829,8 @@ export class TokenProvider implements ITokenProvider {
       }
 
       log.info(
-        `Got token symbol and decimals for ${
-          Object.values(addressToToken).length
-        } out of ${addresses.length} tokens on-chain ${
-          providerConfig ? `as of: ${providerConfig?.blockNumber}` : ''
+        `Got token symbol and decimals for ${Object.values(addressToToken).length
+        } out of ${addresses.length} tokens on-chain ${providerConfig ? `as of: ${providerConfig?.blockNumber}` : ''
         }`
       );
     }
