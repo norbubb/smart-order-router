@@ -1,5 +1,5 @@
 {
-  "name": "@uniswap/smart-order-router",
+  "name": "@jaguarswap/smart-order-router",
   "version": "3.26.1",
   "description": "Uniswap Smart Order Router",
   "main": "build/main/index.js",
