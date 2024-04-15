@@ -1,0 +1,77 @@
+import { ChainId } from '@jaguarswap/sdk-core';
+import { Pair } from '@uniswap/v2-sdk';
+import _ from 'lodash';
+import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
+import { log } from '../../util/log';
+import { DAI_X1, DAI_X1_TESTNET, USDC_X1, USDT_X1, WBTC_X1, } from '../token-provider';
+const BASES_TO_CHECK_TRADES_AGAINST = {
+    [ChainId.X1]: [
+        WRAPPED_NATIVE_CURRENCY[ChainId.X1],
+        DAI_X1,
+        USDC_X1,
+        USDT_X1,
+        WBTC_X1,
+    ],
+    [ChainId.X1_TESTNET]: [
+        WRAPPED_NATIVE_CURRENCY[ChainId.X1_TESTNET],
+        DAI_X1_TESTNET,
+    ],
+};
+/**
+ * Provider that does not get data from an external source and instead returns
+ * a hardcoded list of Subgraph pools.
+ *
+ * Since the pools are hardcoded, the liquidity/price values are dummys and should not
+ * be depended on.
+ *
+ * Useful for instances where other data sources are unavailable. E.g. subgraph not available.
+ *
+ * @export
+ * @class StaticV2SubgraphProvider
+ */
+export class StaticV2SubgraphProvider {
+    constructor(chainId) {
+        this.chainId = chainId;
+    }
+    async getPools(tokenIn, tokenOut) {
+        log.info('In static subgraph provider for V2');
+        const bases = BASES_TO_CHECK_TRADES_AGAINST[this.chainId];
+        const basePairs = _.flatMap(bases, (base) => bases.map((otherBase) => [base, otherBase]));
+        if (tokenIn && tokenOut) {
+            basePairs.push([tokenIn, tokenOut], ...bases.map((base) => [tokenIn, base]), ...bases.map((base) => [tokenOut, base]));
+        }
+        const pairs = _(basePairs)
+            .filter((tokens) => Boolean(tokens[0] && tokens[1]))
+            .filter(([tokenA, tokenB]) => tokenA.address !== tokenB.address && !tokenA.equals(tokenB))
+            .value();
+        const poolAddressSet = new Set();
+        const subgraphPools = _(pairs)
+            .map(([tokenA, tokenB]) => {
+            const poolAddress = Pair.getAddress(tokenA, tokenB);
+            if (poolAddressSet.has(poolAddress)) {
+                return undefined;
+            }
+            poolAddressSet.add(poolAddress);
+            const [token0, token1] = tokenA.sortsBefore(tokenB)
+                ? [tokenA, tokenB]
+                : [tokenB, tokenA];
+            return {
+                id: poolAddress,
+                liquidity: '100',
+                token0: {
+                    id: token0.address,
+                },
+                token1: {
+                    id: token1.address,
+                },
+                supply: 100,
+                reserve: 100,
+                reserveUSD: 100,
+            };
+        })
+            .compact()
+            .value();
+        return subgraphPools;
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RhdGljLXN1YmdyYXBoLXByb3ZpZGVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL3Byb3ZpZGVycy92Mi9zdGF0aWMtc3ViZ3JhcGgtcHJvdmlkZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLE9BQU8sRUFBUyxNQUFNLHNCQUFzQixDQUFDO0FBQ3RELE9BQU8sRUFBRSxJQUFJLEVBQUUsTUFBTSxpQkFBaUIsQ0FBQztBQUN2QyxPQUFPLENBQUMsTUFBTSxRQUFRLENBQUM7QUFFdkIsT0FBTyxFQUFFLHVCQUF1QixFQUFFLE1BQU0sbUJBQW1CLENBQUM7QUFDNUQsT0FBTyxFQUFFLEdBQUcsRUFBRSxNQUFNLGdCQUFnQixDQUFDO0FBQ3JDLE9BQU8sRUFDTCxNQUFNLEVBQ04sY0FBYyxFQUNkLE9BQU8sRUFDUCxPQUFPLEVBQ1AsT0FBTyxHQUNSLE1BQU0sbUJBQW1CLENBQUM7QUFRM0IsTUFBTSw2QkFBNkIsR0FBbUI7SUFDcEQsQ0FBQyxPQUFPLENBQUMsRUFBRSxDQUFDLEVBQUU7UUFDWix1QkFBdUIsQ0FBQyxPQUFPLENBQUMsRUFBRSxDQUFDO1FBQ25DLE1BQU07UUFDTixPQUFPO1FBQ1AsT0FBTztRQUNQLE9BQU87S0FDUjtJQUNELENBQUMsT0FBTyxDQUFDLFVBQVUsQ0FBQyxFQUFFO1FBQ3BCLHVCQUF1QixDQUFDLE9BQU8sQ0FBQyxVQUFVLENBQUM7UUFDM0MsY0FBYztLQUNmO0NBQ0YsQ0FBQztBQUVGOzs7Ozs7Ozs7OztHQVdHO0FBQ0gsTUFBTSxPQUFPLHdCQUF3QjtJQUNuQyxZQUFvQixPQUFnQjtRQUFoQixZQUFPLEdBQVAsT0FBTyxDQUFTO0lBQUcsQ0FBQztJQUVqQyxLQUFLLENBQUMsUUFBUSxDQUNuQixPQUFlLEVBQ2YsUUFBZ0I7UUFFaEIsR0FBRyxDQUFDLElBQUksQ0FBQyxvQ0FBb0MsQ0FBQyxDQUFDO1FBQy9DLE1BQU0sS0FBSyxHQUFHLDZCQUE2QixD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
