@@ -15,7 +15,7 @@ import {
   Rounding,
   Token,
   TradeType
-} from '@uniswap/sdk-core';
+} from '@jaguarswap/sdk-core';
 import {
   PERMIT2_ADDRESS,
   UNIVERSAL_ROUTER_ADDRESS as UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN
@@ -94,6 +94,43 @@ const FORK_BLOCK = 18222746;
 const UNIVERSAL_ROUTER_ADDRESS = UNIVERSAL_ROUTER_ADDRESS_BY_CHAIN(1);
 const SLIPPAGE = new Percent(15, 100); // 5% or 10_000?
 const LARGE_SLIPPAGE = new Percent(45, 100); // 5% or 10_000?
+
+// Those are the worst deviation (we intend to keep them low and strict) tested manually with FORK_BLOCK = 18222746
+// We may need to tune them if we change the FORK_BLOCK
+const GAS_ESTIMATE_DEVIATION_PERCENT: { [chainId in ChainId]: number } = {
+  [ChainId.MAINNET]: 40,
+  [ChainId.GOERLI]: 62,
+  [ChainId.SEPOLIA]: 50,
+  [ChainId.OPTIMISM]: 35,
+  [ChainId.OPTIMISM_GOERLI]: 30,
+  [ChainId.OPTIMISM_SEPOLIA]: 30,
+  [ChainId.ARBITRUM_ONE]: 53,
+  [ChainId.ARBITRUM_GOERLI]: 50,
+  [ChainId.ARBITRUM_SEPOLIA]: 50,
+  [ChainId.POLYGON]: 38,
+  [ChainId.POLYGON_MUMBAI]: 30,
+  [ChainId.CELO]: 30,
+  [ChainId.CELO_ALFAJORES]: 30,
+  [ChainId.GNOSIS]: 30,
+  [ChainId.MOONBEAM]: 30,
+  [ChainId.BNB]: 44,
+  [ChainId.AVALANCHE]: 36,
+  [ChainId.BASE]: 34,
+  [ChainId.BASE_GOERLI]: 30,
+  [ChainId.ZORA]: 30,
+  [ChainId.ZORA_SEPOLIA]: 30,
+  [ChainId.ROOTSTOCK]: 30,
+  [ChainId.BLAST]: 34,
+}
+
+const V2_SUPPORTED_PAIRS = [
+  [WETH9[ChainId.ARBITRUM_ONE], USDC_NATIVE_ARBITRUM],
+  [WETH9[ChainId.OPTIMISM], USDC_NATIVE_OPTIMISM],
+  [WRAPPED_NATIVE_CURRENCY[ChainId.POLYGON], USDC_NATIVE_POLYGON],
+  [WETH9[ChainId.BASE], USDC_NATIVE_BASE],
+  [WRAPPED_NATIVE_CURRENCY[ChainId.BNB], USDC_BNB],
+  [WRAPPED_NATIVE_CURRENCY[ChainId.AVALANCHE], USDC_NATIVE_AVAX],
+];
 
 const checkQuoteToken = (
   before: CurrencyAmount<Currency>,
@@ -2417,7 +2454,7 @@ describe('alpha router integration', () => {
           GREENLIST_TOKEN_PAIRS.forEach(([tokenIn, tokenOut]) => {
             it(`${tokenIn.symbol} -> ${tokenOut.symbol} with portion`, async () => {
               const originalAmount = (tokenIn.symbol === 'WBTC' && tradeType === TradeType.EXACT_INPUT) ||
-              (tokenOut.symbol === 'WBTC' && tradeType === TradeType.EXACT_OUTPUT)
+                (tokenOut.symbol === 'WBTC' && tradeType === TradeType.EXACT_OUTPUT)
                 ? '1'
                 : '100';
               const amount =
@@ -2500,7 +2537,7 @@ describe('alpha router integration', () => {
               );
 
               // skip checking token in amount for native ETH, since we have no way to know the exact gas cost in terms of ETH token
-              const checkTokenInAmount = tokenIn.isNative ? undefined: parseFloat(amount.toFixed(0))
+              const checkTokenInAmount = tokenIn.isNative ? undefined : parseFloat(amount.toFixed(0))
               // skip checking token out amount for native ETH, since we have no way to know the exact gas cost in terms of ETH token
               const checkTokenOutAmount = tokenOut.isNative ? undefined : parseFloat(amount.toFixed(0))
               const checkPortionAmount = parseFloat(expectedPortionAmount.toFixed(0))
@@ -3101,7 +3138,7 @@ describe('quote for other networks', () => {
       const erc1 = TEST_ERC20_1[chain]();
       const erc2 = TEST_ERC20_2[chain]();
 
-      describe(`${ID_TO_NETWORK_NAME(chain)} ${tradeType} 2xx`, function() {
+      describe(`${ID_TO_NETWORK_NAME(chain)} ${tradeType} 2xx`, function () {
         const wrappedNative = WNATIVE_ON(chain);
 
         let alphaRouter: AlphaRouter;
@@ -3168,7 +3205,7 @@ describe('quote for other networks', () => {
           });
         });
 
-        describe(`Swap`, function() {
+        describe(`Swap`, function () {
           it(`${wrappedNative.symbol} -> erc20`, async () => {
             const tokenIn = wrappedNative;
             const tokenOut = erc1;
@@ -3334,7 +3371,7 @@ describe('quote for other networks', () => {
         });
 
         if (isTenderlyEnvironmentSet()) {
-          describe(`Simulate + Swap ${tradeType.toString()}`, function() {
+          describe(`Simulate + Swap ${tradeType.toString()}`, function () {
             // Tenderly does not support Celo
             if ([ChainId.CELO, ChainId.CELO_ALFAJORES].includes(chain)) {
               return;
@@ -3365,6 +3402,30 @@ describe('quote for other networks', () => {
                     simulate: { fromAddress: WHALES(tokenIn) },
                   };
 
+              const swapWithSimulation = await alphaRouter.route(
+                amount,
+                getQuoteToken(tokenIn, tokenOut, tradeType),
+                tradeType,
+                swapWithSimulationOptions,
+                {
+                  // @ts-ignore[TS7053] - complaining about switch being non exhaustive
+                  ...DEFAULT_ROUTING_CONFIG_BY_CHAIN[chain],
+                  protocols: [Protocol.V3, Protocol.V2],
+                  saveTenderlySimulationIfFailed: true,
+                }
+              );
+              expect(swapWithSimulation).toBeDefined();
+              expect(swapWithSimulation).not.toBeNull();
+
+              // Universal Router is not deployed on Gorli.
+              const swapOptions: SwapOptions =
+              {
+                type: SwapType.UNIVERSAL_ROUTER,
+                recipient: WHALES(tokenIn),
+                slippageTolerance: SLIPPAGE,
+                deadlineOrPreviousBlockhash: parseDeadline(360),
+              };
+
               const swap = await alphaRouter.route(
                 amount,
                 getQuoteToken(tokenIn, tokenOut, tradeType),
@@ -3387,7 +3448,110 @@ describe('quote for other networks', () => {
                 );
 
                 // Expect tenderly simulation to be successful
-                expect(swap.simulationStatus).toEqual(
+                expect(swapWithSimulation.simulationStatus).toEqual(
+                  SimulationStatus.Succeeded
+                );
+              }
+
+              // Scope limited for non mainnet network tests to validating the swap
+            });
+
+            it(`${wrappedNative.symbol} -> ${erc1.symbol} v2 only`, async () => {
+              const tokenIn = wrappedNative;
+              const tokenOut = erc1;
+
+              const isV2PairRoutable =
+                V2_SUPPORTED_PAIRS.find((pair) => pair[0]!.equals(tokenIn) && pair[1]!.equals(tokenOut));
+
+              if (!isV2PairRoutable) {
+                return;
+              }
+
+              const amount =
+                tradeType == TradeType.EXACT_INPUT
+                  ? parseAmount('0.1', tokenIn)
+                  : parseAmount('0.1', tokenOut);
+
+              // Universal Router is not deployed on Gorli.
+              const swapWithSimulationOptions: SwapOptions =
+                chain == ChainId.GOERLI
+                  ? {
+                    type: SwapType.SWAP_ROUTER_02,
+                    recipient: WHALES(tokenIn),
+                    slippageTolerance: SLIPPAGE,
+                    deadline: parseDeadline(360),
+                    simulate: { fromAddress: WHALES(tokenIn) },
+                  }
+                  : {
+                    type: SwapType.UNIVERSAL_ROUTER,
+                    recipient: WHALES(tokenIn),
+                    slippageTolerance: SLIPPAGE,
+                    deadlineOrPreviousBlockhash: parseDeadline(360),
+                    simulate: { fromAddress: WHALES(tokenIn) },
+                  };
+
+              const swapWithSimulation = await alphaRouter.route(
+                amount,
+                getQuoteToken(tokenIn, tokenOut, tradeType),
+                tradeType,
+                swapWithSimulationOptions,
+                {
+                  // @ts-ignore[TS7053] - complaining about switch being non exhaustive
+                  ...DEFAULT_ROUTING_CONFIG_BY_CHAIN[chain],
+                  protocols: [Protocol.V2],
+                  saveTenderlySimulationIfFailed: true,
+                }
+              );
+              expect(swapWithSimulation).toBeDefined();
+              expect(swapWithSimulation).not.toBeNull();
+
+              // Universal Router is not deployed on Gorli.
+              const swapOptions: SwapOptions =
+              {
+                type: SwapType.UNIVERSAL_ROUTER,
+                recipient: WHALES(tokenIn),
+                slippageTolerance: SLIPPAGE,
+                deadlineOrPreviousBlockhash: parseDeadline(360),
+              };
+
+              const swap = await alphaRouter.route(
+                amount,
+                getQuoteToken(tokenIn, tokenOut, tradeType),
+                tradeType,
+                swapOptions,
+                {
+                  // @ts-ignore[TS7053] - complaining about switch being non exhaustive
+                  ...DEFAULT_ROUTING_CONFIG_BY_CHAIN[chain],
+                  protocols: [Protocol.V3, Protocol.V2],
+                  saveTenderlySimulationIfFailed: true,
+                }
+              );
+
+              expect(swap).toBeDefined();
+              expect(swap).not.toBeNull();
+
+              const gasEstimateDiff = swapWithSimulation!.estimatedGasUsed.gt(swap!.estimatedGasUsed)
+                ? swapWithSimulation!.estimatedGasUsed.sub(swap!.estimatedGasUsed)
+                : swap!.estimatedGasUsed.sub(swapWithSimulation!.estimatedGasUsed);
+
+              // We will rely on Tenderly gas estimate as source of truth against SOR non-simulated gas estimate accuracy.
+              // This is the only reliable and long-term feasible test assertion approach.
+              // For example, in the near future, after EIP-4844, we expect the gas estimate to drop by (3 / 16)
+              // due to gas cost per compressed calldata byte dropping from 16 to 3.
+              // Relying on Tenderly gas estimate is the only way our github CI can auto catch this.
+              const percentDiff = gasEstimateDiff.mul(BigNumber.from(100)).div(swapWithSimulation!.estimatedGasUsed);
+              console.log(`chain ${chain} GAS_ESTIMATE_DEVIATION_PERCENT ${percentDiff.toNumber()}`)
+              expect(percentDiff.lte(BigNumber.from(GAS_ESTIMATE_DEVIATION_PERCENT[chain]))).toBe(true);
+
+              if (swapWithSimulation) {
+                expect(
+                  swapWithSimulation.quoteGasAdjusted
+                    .subtract(swapWithSimulation.quote)
+                    .equalTo(swapWithSimulation.estimatedGasUsedQuoteToken)
+                );
+
+                // Expect tenderly simulation to be successful
+                expect(swapWithSimulation.simulationStatus).toEqual(
                   SimulationStatus.Succeeded
                 );
               }
@@ -3420,6 +3584,30 @@ describe('quote for other networks', () => {
                     deadlineOrPreviousBlockhash: parseDeadline(360),
                     simulate: { fromAddress: WHALES(tokenIn) },
                   };
+
+              const swapWithSimulation = await alphaRouter.route(
+                amount,
+                getQuoteToken(tokenIn, tokenOut, tradeType),
+                tradeType,
+                swapWithSimulationOptions,
+                {
+                  // @ts-ignore[TS7053] - complaining about switch being non exhaustive
+                  ...DEFAULT_ROUTING_CONFIG_BY_CHAIN[chain],
+                  protocols: [Protocol.V3, Protocol.V2],
+                  saveTenderlySimulationIfFailed: true,
+                }
+              );
+              expect(swapWithSimulation).toBeDefined();
+              expect(swapWithSimulation).not.toBeNull();
+
+              // Universal Router is not deployed on Gorli.
+              const swapOptions: SwapOptions =
+              {
+                type: SwapType.UNIVERSAL_ROUTER,
+                recipient: WHALES(tokenIn),
+                slippageTolerance: SLIPPAGE,
+                deadlineOrPreviousBlockhash: parseDeadline(360),
+              };
 
               const swap = await alphaRouter.route(
                 amount,
@@ -3478,6 +3666,30 @@ describe('quote for other networks', () => {
                     deadlineOrPreviousBlockhash: parseDeadline(360),
                     simulate: { fromAddress: WHALES(tokenIn) },
                   };
+
+              const swapWithSimulation = await alphaRouter.route(
+                amount,
+                getQuoteToken(tokenIn, tokenOut, tradeType),
+                tradeType,
+                swapWithSimulationOptions,
+                {
+                  // @ts-ignore[TS7053] - complaining about switch being non exhaustive
+                  ...DEFAULT_ROUTING_CONFIG_BY_CHAIN[chain],
+                  protocols: [Protocol.V3, Protocol.V2],
+                  saveTenderlySimulationIfFailed: true,
+                }
+              );
+              expect(swapWithSimulation).toBeDefined();
+              expect(swapWithSimulation).not.toBeNull();
+
+              // Universal Router is not deployed on Gorli.
+              const swapOptions: SwapOptions =
+              {
+                type: SwapType.UNIVERSAL_ROUTER,
+                recipient: WHALES(tokenIn),
+                slippageTolerance: SLIPPAGE,
+                deadlineOrPreviousBlockhash: parseDeadline(360),
+              };
 
               const swap = await alphaRouter.route(
                 amount,

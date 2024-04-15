@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
+import { ChainId, Currency, Token, TradeType } from '@jaguarswap/sdk-core';
 import { Pair } from '@uniswap/v2-sdk';
 import { Pool } from '@uniswap/v3-sdk';
 import _ from 'lodash';
@@ -28,7 +28,10 @@ import { GetQuotesResult, GetRoutesResult } from './model/results';
  * @template Route
  */
 export abstract class BaseQuoter<
-  CandidatePools extends V2CandidatePools | V3CandidatePools | [V3CandidatePools, V2CandidatePools],
+  CandidatePools extends
+  | V2CandidatePools
+  | V3CandidatePools
+  | [V3CandidatePools, V2CandidatePools],
   Route extends V2Route | V3Route | MixedRoute
 > {
   protected tokenProvider: ITokenProvider;

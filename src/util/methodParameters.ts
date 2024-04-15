@@ -4,7 +4,7 @@ import {
   SwapRouter as SwapRouter02,
   Trade,
 } from '@uniswap/router-sdk';
-import { ChainId, Currency, TradeType } from '@uniswap/sdk-core';
+import { type ChainId, type Currency, TradeType } from '@jaguarswap/sdk-core';
 import {
   SwapRouter as UniveralRouter,
   UNIVERSAL_ROUTER_ADDRESS,
@@ -15,14 +15,14 @@ import _ from 'lodash';
 
 import {
   CurrencyAmount,
-  MethodParameters,
-  MixedRouteWithValidQuote,
-  RouteWithValidQuote,
+  type MethodParameters,
+  type MixedRouteWithValidQuote,
+  type RouteWithValidQuote,
   SWAP_ROUTER_02_ADDRESSES,
-  SwapOptions,
+  type SwapOptions,
   SwapType,
-  V2RouteWithValidQuote,
-  V3RouteWithValidQuote,
+  type V2RouteWithValidQuote,
+  type V3RouteWithValidQuote,
 } from '..';
 
 export function buildTrade<TTradeType extends TradeType>(

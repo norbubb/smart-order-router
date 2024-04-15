@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Protocol } from '@uniswap/router-sdk';
-import { ChainId, Currency, Token, TradeType } from '@uniswap/sdk-core';
+import { ChainId, Currency, Token, TradeType } from '@jaguarswap/sdk-core';
 import _ from 'lodash';
 
 import {
@@ -147,7 +147,7 @@ export class V2Quoter extends BaseQuoter<V2CandidatePools, V2Route> {
     }
     // safe to force unwrap here because we throw if there are no amounts
     const amountToken = amounts[0]!.currency;
-    
+
     if (routes.length == 0) {
       return { routesWithValidQuotes: [], candidatePools };
     }

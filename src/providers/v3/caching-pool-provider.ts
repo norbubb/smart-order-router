@@ -1,4 +1,4 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 import { FeeAmount, Pool } from '@uniswap/v3-sdk';
 import _ from 'lodash';
 
@@ -32,8 +32,7 @@ export class CachingV3PoolProvider implements IV3PoolProvider {
     protected chainId: ChainId,
     protected poolProvider: IV3PoolProvider,
     private cache: ICache<Pool>
-  ) {
-  }
+  ) { }
 
   public async getPools(
     tokenPairs: [Token, Token, FeeAmount][],
@@ -82,10 +81,8 @@ export class CachingV3PoolProvider implements IV3PoolProvider {
           (t) => `${t[0].symbol} ${t[1].symbol} ${t[2]}`
         ),
       },
-      `Found ${
-        Object.keys(poolAddressToPool).length
-      } V3 pools already in local cache. About to get liquidity and slot0s for ${
-        poolsToGetTokenPairs.length
+      `Found ${Object.keys(poolAddressToPool).length
+      } V3 pools already in local cache. About to get liquidity and slot0s for ${poolsToGetTokenPairs.length
       } pools.`
     );
 

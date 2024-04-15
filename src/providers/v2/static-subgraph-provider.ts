@@ -1,14 +1,15 @@
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 import { Pair } from '@uniswap/v2-sdk';
 import _ from 'lodash';
 
 import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 import { log } from '../../util/log';
 import {
-  DAI_MAINNET,
-  USDC_MAINNET,
-  USDT_MAINNET,
-  WBTC_MAINNET
+  DAI_X1,
+  DAI_X1_TESTNET,
+  USDC_X1,
+  USDT_X1,
+  WBTC_X1,
 } from '../token-provider';
 
 import { IV2SubgraphProvider, V2SubgraphPool } from './subgraph-provider';
@@ -18,30 +19,17 @@ type ChainTokenList = {
 };
 
 const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
-  [ChainId.MAINNET]: [
-    WRAPPED_NATIVE_CURRENCY[ChainId.MAINNET]!,
-    DAI_MAINNET,
-    USDC_MAINNET,
-    USDT_MAINNET,
-    WBTC_MAINNET
+  [ChainId.X1]: [
+    WRAPPED_NATIVE_CURRENCY[ChainId.X1],
+    DAI_X1,
+    USDC_X1,
+    USDT_X1,
+    WBTC_X1,
   ],
-  [ChainId.GOERLI]: [WRAPPED_NATIVE_CURRENCY[ChainId.GOERLI]!],
-  [ChainId.SEPOLIA]: [WRAPPED_NATIVE_CURRENCY[ChainId.SEPOLIA]!],
-  //v2 not deployed on [optimism, arbitrum, polygon, celo, gnosis, moonbeam, bnb, avalanche] and their testnets
-  [ChainId.OPTIMISM]: [],
-  [ChainId.ARBITRUM_ONE]: [],
-  [ChainId.ARBITRUM_GOERLI]: [],
-  [ChainId.OPTIMISM_GOERLI]: [],
-  [ChainId.POLYGON]: [],
-  [ChainId.POLYGON_MUMBAI]: [],
-  [ChainId.CELO]: [],
-  [ChainId.CELO_ALFAJORES]: [],
-  [ChainId.GNOSIS]: [],
-  [ChainId.MOONBEAM]: [],
-  [ChainId.BNB]: [],
-  [ChainId.AVALANCHE]: [],
-  [ChainId.BASE_GOERLI]: [],
-  [ChainId.BASE]: []
+  [ChainId.X1_TESTNET]: [
+    WRAPPED_NATIVE_CURRENCY[ChainId.X1_TESTNET],
+    DAI_X1_TESTNET,
+  ],
 };
 
 /**
@@ -108,14 +96,14 @@ export class StaticV2SubgraphProvider implements IV2SubgraphProvider {
           id: poolAddress,
           liquidity: '100',
           token0: {
-            id: token0.address
+            id: token0.address,
           },
           token1: {
-            id: token1.address
+            id: token1.address,
           },
           supply: 100,
           reserve: 100,
-          reserveUSD: 100
+          reserveUSD: 100,
         };
       })
       .compact()

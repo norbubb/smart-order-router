@@ -6,7 +6,7 @@ import {
   CurrencyAmount,
   Token,
   TradeType,
-} from '@uniswap/sdk-core';
+} from '@jaguarswap/sdk-core';
 import { Pair } from '@uniswap/v2-sdk/dist/entities';
 import { FeeAmount, Pool } from '@uniswap/v3-sdk';
 import JSBI from 'jsbi';
@@ -15,10 +15,6 @@ import _ from 'lodash';
 import { IV2PoolProvider } from '../providers';
 import { IPortionProvider } from '../providers/portion-provider';
 import { ProviderConfig } from '../providers/provider';
-import {
-  ArbitrumGasData,
-  OptimismGasData,
-} from '../providers/v3/gas-data-provider';
 import { IV3PoolProvider } from '../providers/v3/pool-provider';
 import {
   MethodParameters,
@@ -115,7 +111,7 @@ export async function getHighestLiquidityV3USDPool(
   providerConfig?: ProviderConfig
 ): Promise<Pool> {
   const usdTokens = usdGasTokensByChain[chainId];
-  const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
+  const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId];
 
   if (!usdTokens) {
     throw new Error(
@@ -214,35 +210,6 @@ export async function getGasCostInQuoteToken(
   return gasCostQuoteToken;
 }
 
-export function calculateArbitrumToL1FeeFromCalldata(
-  calldata: string,
-  gasData: ArbitrumGasData
-): [BigNumber, BigNumber] {
-  const { perL2TxFee, perL1CalldataFee } = gasData;
-  // calculates gas amounts based on bytes of calldata, use 0 as overhead.
-  const l1GasUsed = getL2ToL1GasUsed(calldata, BigNumber.from(0));
-  // multiply by the fee per calldata and add the flat l2 fee
-  let l1Fee = l1GasUsed.mul(perL1CalldataFee);
-  l1Fee = l1Fee.add(perL2TxFee);
-  return [l1GasUsed, l1Fee];
-}
-
-export function calculateOptimismToL1FeeFromCalldata(
-  calldata: string,
-  gasData: OptimismGasData
-): [BigNumber, BigNumber] {
-  const { l1BaseFee, scalar, decimals, overhead } = gasData;
-
-  const l1GasUsed = getL2ToL1GasUsed(calldata, overhead);
-  // l1BaseFee is L1 Gas Price on etherscan
-  const l1Fee = l1GasUsed.mul(l1BaseFee);
-  const unscaled = l1Fee.mul(scalar);
-  // scaled = unscaled / (10 ** decimals)
-  const scaledConversion = BigNumber.from(10).pow(decimals);
-  const scaled = unscaled.div(scaledConversion);
-  return [l1GasUsed, scaled];
-}
-
 // based on the code from the optimism OVM_GasPriceOracle contract
 export function getL2ToL1GasUsed(data: string, overhead: BigNumber): BigNumber {
   // data is hex encoded
@@ -268,31 +235,12 @@ export async function calculateGasUsed(
   simulatedGasUsed: BigNumber,
   v2PoolProvider: IV2PoolProvider,
   v3PoolProvider: IV3PoolProvider,
-  l2GasData?: ArbitrumGasData | OptimismGasData,
   providerConfig?: ProviderConfig
 ) {
   const quoteToken = route.quote.currency.wrapped;
   const gasPriceWei = route.gasPriceWei;
   // calculate L2 to L1 security fee if relevant
   let l2toL1FeeInWei = BigNumber.from(0);
-  if ([ChainId.ARBITRUM_ONE, ChainId.ARBITRUM_GOERLI].includes(chainId)) {
-    l2toL1FeeInWei = calculateArbitrumToL1FeeFromCalldata(
-      route.methodParameters!.calldata,
-      l2GasData as ArbitrumGasData
-    )[1];
-  } else if (
-    [
-      ChainId.OPTIMISM,
-      ChainId.OPTIMISM_GOERLI,
-      ChainId.BASE,
-      ChainId.BASE_GOERLI,
-    ].includes(chainId)
-  ) {
-    l2toL1FeeInWei = calculateOptimismToL1FeeFromCalldata(
-      route.methodParameters!.calldata,
-      l2GasData as OptimismGasData
-    )[1];
-  }
 
   // add l2 to l1 fee and wrap fee to native currency
   const gasCostInWei = gasPriceWei.mul(simulatedGasUsed).add(l2toL1FeeInWei);

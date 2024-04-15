@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { ChainId, TradeType } from '@uniswap/sdk-core';
+import { ChainId, TradeType } from '@jaguarswap/sdk-core';
 import { PERMIT2_ADDRESS } from '@uniswap/universal-router-sdk';
 import { BigNumber } from 'ethers/lib/ethers';
 
@@ -14,7 +14,6 @@ import {
 
 import { IPortionProvider } from './portion-provider';
 import { ProviderConfig } from './provider';
-import { ArbitrumGasData, OptimismGasData } from './v3/gas-data-provider';
 
 export type SimulationResult = {
   transaction: { hash: string; gas_used: number; gas: number; error_message: string };
@@ -54,7 +53,6 @@ export abstract class Simulator {
     swapRoute: SwapRoute,
     amount: CurrencyAmount,
     quote: CurrencyAmount,
-    l2GasData?: OptimismGasData | ArbitrumGasData,
     providerConfig?: ProviderConfig
   ): Promise<SwapRoute> {
     if (
@@ -73,7 +71,6 @@ export abstract class Simulator {
           fromAddress,
           swapOptions,
           swapRoute,
-          l2GasData,
           providerConfig
         );
       } catch (e) {
@@ -96,7 +93,6 @@ export abstract class Simulator {
     fromAddress: string,
     swapOptions: SwapOptions,
     swapRoute: SwapRoute,
-    l2GasData?: OptimismGasData | ArbitrumGasData,
     providerConfig?: ProviderConfig
   ): Promise<SwapRoute>;
 

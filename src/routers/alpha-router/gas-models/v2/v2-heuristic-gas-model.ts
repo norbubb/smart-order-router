@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { ChainId, Token } from '@jaguarswap/sdk-core';
 import { Pair } from '@uniswap/v2-sdk';
 import _ from 'lodash';
 
@@ -254,7 +254,7 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
     poolProvider: IV2PoolProvider,
     providerConfig?: ProviderConfig
   ): Promise<Pair> {
-    const usdTokens = usdGasTokensByChain[chainId];
+    const usdTokens = usdGasTokensByChain[chainId]!;
 
     if (!usdTokens) {
       throw new Error(

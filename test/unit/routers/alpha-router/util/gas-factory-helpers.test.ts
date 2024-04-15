@@ -15,6 +15,13 @@ import {
   USDC_WETH_LOW_LIQ_LOW,
   USDC_WETH_MED_LIQ_MEDIUM,
 } from '../../../../test-util/mock-data';
+import { BigNumber } from 'ethers';
+import { getMockedV2PoolProvider, getMockedV3PoolProvider } from '../gas-models/test-util/mocked-dependencies';
+import { ChainId, TradeType } from '@jaguarswap/sdk-core';
+import { Trade } from '@uniswap/router-sdk';
+import { Route } from '@uniswap/v3-sdk';
+import { getPools } from '../gas-models/test-util/helpers';
+import { BaseProvider } from '@ethersproject/providers';
 
 const mockUSDCNativePools = [
   USDC_WETH_LOW_LIQ_LOW,
