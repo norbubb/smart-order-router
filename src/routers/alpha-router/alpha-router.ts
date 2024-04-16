@@ -493,13 +493,13 @@ export class AlphaRouter
               maxTimeout: 1000,
             },
             {
-              multicallChunk: 210,
+              multicallChunk: 20,
               gasLimitPerCall: 705_000,
-              quoteMinSuccessRate: 0.15,
+              quoteMinSuccessRate: 0,
             },
             {
               gasLimitOverride: 2_000_000,
-              multicallChunk: 70,
+              multicallChunk: 20,
             }
           );
           break;
@@ -588,6 +588,7 @@ export class AlphaRouter
           chainId,
           new URISubgraphProvider(
             chainId,
+            // FIXME: 替换成 X1 v3 的 pool 列表，参考：https://cloudflare-ipfs.com/ipns/api.uniswap.org/v1/pools/v3/mainnet.json
             `https://cloudflare-ipfs.com/ipns/api.uniswap.org/v1/pools/v3/${chainName}.json`,
             undefined,
             0
@@ -1359,7 +1360,6 @@ export class AlphaRouter
       'Routing across CachedRoute'
     );
     const quotePromises: Promise<GetQuotesResult>[] = [];
-    debugger;
     const v3Routes = cachedRoutes.routes.filter(
       (route) => route.protocol === Protocol.V3
     );

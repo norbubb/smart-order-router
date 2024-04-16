@@ -10,7 +10,6 @@ import { NETWORKS_WITH_SAME_UNISWAP_ADDRESSES } from './chains';
 export const MIXED_ROUTE_QUOTER_V1_ADDRESSES: AddressMap = {};
 
 export const QUOTER_V2_ADDRESSES: AddressMap = {
-  ...constructSameAddressMap('0x61fFE014bA17989E743c5F6cB21bF9697530B21e'),
   [ChainId.X1]: CHAIN_TO_ADDRESSES_MAP[ChainId.X1].quoterAddress,
   [ChainId.X1_TESTNET]:
     CHAIN_TO_ADDRESSES_MAP[ChainId.X1_TESTNET].quoterAddress,
