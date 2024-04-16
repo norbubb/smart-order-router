@@ -1,6 +1,5 @@
 .idea/*
 .yalc
-build
 .nyc_output
 node_modules
 src/**.js
