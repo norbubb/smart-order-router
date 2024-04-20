@@ -21,7 +21,6 @@ export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
     CHAIN_TO_ADDRESSES_MAP[ChainId.X1_TESTNET].v3CoreFactoryAddress,
 };
 export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
-  ...constructSameAddressMap('0x1F98415757620B543A52E61c46B32eB19261F984'),
   [ChainId.X1]: CHAIN_TO_ADDRESSES_MAP[ChainId.X1].multicallAddress,
   [ChainId.X1_TESTNET]:
     CHAIN_TO_ADDRESSES_MAP[ChainId.X1_TESTNET].multicallAddress,

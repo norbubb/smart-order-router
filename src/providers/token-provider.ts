@@ -40,10 +40,10 @@ export type TokenAccessor = {
 // FIXME: 替换成实际地址
 export const USDC_X1 = new Token(
   ChainId.X1,
-  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  '0x74b7f16337b8972027f6196a17a631ac6de26d22',
   6,
   'USDC',
-  'USD//C'
+  'USD Coin'
 );
 
 export const USDC_X1_TESTNET = new Token(
@@ -55,7 +55,7 @@ export const USDC_X1_TESTNET = new Token(
 );
 export const USDT_X1 = new Token(
   ChainId.X1,
-  '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  '0x1e4a5963abfd975d8c9021ce480b42188849d41d',
   6,
   'USDT',
   'Tether USD'
@@ -76,7 +76,7 @@ export const WBTC_X1 = new Token(
 );
 export const DAI_X1 = new Token(
   ChainId.X1,
-  '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+  '0xc5015b9d9161dca7e18e32f6f25c4ad850731fd4',
   18,
   'DAI',
   'Dai Stablecoin'

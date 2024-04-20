@@ -57,6 +57,7 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
+  [ChainId.X1]: NativeCurrencyName.OKB,
   [ChainId.X1_TESTNET]: NativeCurrencyName.OKB,
 };
 
@@ -64,6 +65,8 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
   switch (id) {
     case 195:
       return ChainName.X1_TESTNET;
+    case 196:
+      return ChainName.X1;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -75,8 +78,10 @@ export const CHAIN_IDS_LIST = Object.values(ChainId).map((c) =>
 
 export const ID_TO_PROVIDER = (id: ChainId): string => {
   switch (id) {
-    case ChainId.X1_TESTNET:
+    case ChainId.X1:
       return process.env.JSON_RPC_PROVIDER_X1TESTNET!;
+      case ChainId.X1_TESTNET:
+        return process.env.JSON_RPC_PROVIDER_X1TESTNET!;
     default:
       throw new Error(`Chain id: ${id} not supported`);
   }
@@ -85,7 +90,7 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
 export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
   [ChainId.X1]: new Token(
     ChainId.X1,
-    '0xee1a9629cce8f26deb1ecffbd8f306bef2117423',
+    '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
     18,
     'WOKB',
     'Wrapped OKB'

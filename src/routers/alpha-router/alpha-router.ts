@@ -493,13 +493,13 @@ export class AlphaRouter
               maxTimeout: 1000,
             },
             {
-              multicallChunk: 20,
+              multicallChunk: 30,
               gasLimitPerCall: 705_000,
               quoteMinSuccessRate: 0,
             },
             {
               gasLimitOverride: 2_000_000,
-              multicallChunk: 20,
+              multicallChunk: 30,
             }
           );
           break;
